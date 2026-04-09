@@ -329,22 +329,22 @@ static_path = Path(__file__).parent / "static"
 static_path.mkdir(exist_ok=True)
 app.mount("/static", StaticFiles(directory=str(static_path)), name="static")
 
-# Validation/test videos
-validation_path = Path(__file__).parent.parent / "validation"
-if validation_path.exists():
-    app.mount("/test-videos", StaticFiles(directory=str(validation_path)), name="test-videos")
+# Demo videos for testing
+demo_videos_path = Path(__file__).parent.parent / "demo_videos"
+if demo_videos_path.exists():
+    app.mount("/demo-videos", StaticFiles(directory=str(demo_videos_path)), name="demo-videos")
 
 
-@app.get("/api/test-videos")
-async def list_test_videos():
-    """List available test videos in the validation folder."""
+@app.get("/api/demo-videos")
+async def list_demo_videos():
+    """List available demo videos."""
     videos = []
-    if validation_path.exists():
-        for f in validation_path.glob("*.mp4"):
+    if demo_videos_path.exists():
+        for f in demo_videos_path.glob("*.mp4"):
             videos.append({
                 "name": f.stem.replace("_", " ").title(),
                 "filename": f.name,
-                "url": f"/test-videos/{f.name}",
+                "url": f"/demo-videos/{f.name}",
                 "size_mb": round(f.stat().st_size / (1024 * 1024), 2)
             })
     return {"videos": videos}

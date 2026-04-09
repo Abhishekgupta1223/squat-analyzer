@@ -12,7 +12,7 @@ from squat_analyzer.analysis.squat_detector import SquatDetector, SquatPhase
 from squat_analyzer.config.settings import Settings
 
 def main():
-    video_path = Path(__file__).parent.parent / "test_videos" / "squat_proper_form.mp4"
+    video_path = Path(__file__).parent.parent / "demo_videos" / "squat_proper_form.mp4"
     
     settings = Settings()
     pose_est = PoseEstimator(config=settings.pose)

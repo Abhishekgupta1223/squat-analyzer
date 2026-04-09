@@ -9,7 +9,7 @@ Records a video demonstrating the squat analyzer functionality:
 
 Usage:
     python scripts/record_demo.py
-    python scripts/record_demo.py --source test_videos/squat_proper_form.mp4
+    python scripts/record_demo.py --source demo_videos/squat_proper_form.mp4
 """
 
 import sys

@@ -989,7 +989,7 @@
             list.innerHTML = '<div style="text-align:center;color:var(--text-3);font-size:11px;padding:10px;">Loading...</div>';
             
             try {
-                const res = await fetch('/api/test-videos');
+                const res = await fetch('/api/demo-videos');
                 const data = await res.json();
                 if (data.videos.length === 0) {
                     list.innerHTML = '<div style="text-align:center;color:var(--text-3);font-size:11px;padding:10px;">No test videos found</div>';

@@ -230,8 +230,8 @@ def print_result(result: VideoTestResult) -> None:
 
 
 def main():
-    """Run tests on all videos in test_videos directory."""
-    test_dir = Path(__file__).parent.parent / "test_videos"
+    """Run tests on all videos in demo_videos directory."""
+    test_dir = Path(__file__).parent.parent / "demo_videos"
     
     if not test_dir.exists():
         print(f"Test directory not found: {test_dir}")

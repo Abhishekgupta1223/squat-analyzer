@@ -79,7 +79,7 @@ def test_video(video_path: Path, max_frames: int = 300):
 
 
 def main():
-    test_dir = Path(__file__).parent.parent / "test_videos"
+    test_dir = Path(__file__).parent.parent / "demo_videos"
     
     # Test webcam-style videos first
     webcam_videos = [
