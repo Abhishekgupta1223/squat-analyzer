@@ -11,10 +11,10 @@
 <p align="center">
   <a href="#-quick-start">Quick Start</a> •
   <a href="#-features">Features</a> •
-  <a href="#%EF%B8%8F-system-architecture">Architecture</a> •
+  <a href="#-architecture">Architecture</a> •
   <a href="#-pipeline">Pipeline</a> •
-  <a href="#-api">API</a> •
-  <a href="#-demo">Demo</a>
+  <a href="#-api-reference">API</a> •
+  <a href="#-benchmarks">Benchmarks</a>
 </p>
 
 <p align="center">
@@ -30,32 +30,6 @@
   <img src="https://img.shields.io/badge/Biomechanical_Rules-6-orange?style=flat-square" alt="Rules"/>
   <img src="https://img.shields.io/badge/Latency-<100ms-success?style=flat-square" alt="Latency"/>
 </p>
-
----
-
-## 🎬 Demo
-
-<p align="center">
-  <strong>📹 Watch the system analyze squats in real-time</strong>
-</p>
-
-```
-┌────────────────────────────────────────────────────────────────┐
-│                                                                │
-│     🎥  INPUT                    📊  OUTPUT                    │
-│     ─────────                    ──────────                    │
-│                                                                │
-│     ┌─────────┐                  ┌─────────────────────────┐   │
-│     │  📹    │                  │  ✅ Depth: OPTIMAL       │   │
-│     │ Webcam │    ───────▶     │  ✅ Knees: TRACKING WELL │   │
-│     │   or   │                  │  ⚠️ Torso: LEAN FORWARD  │   │
-│     │ Video  │                  │  📈 Reps: 5              │   │
-│     └─────────┘                  └─────────────────────────┘   │
-│                                                                │
-└────────────────────────────────────────────────────────────────┘
-```
-
-**▶️ [View Full Demo Video](#)** | **🌐 [Try Live Demo](http://localhost:8000)**
 
 ---
 
@@ -85,14 +59,11 @@
 + ✅ "Good torso position — spine neutral"
 + ✅ "Knees tracking well over toes"
 
-- ❌ "Squat depth insufficient — hips too high"
+- ⚠️ "Squat depth insufficient — hips too high"
 -    → Correction: "Sit back and down. Imagine sitting into a low chair"
 
-- ❌ "⚠️ KNEE VALGUS — Injury risk! Knees collapsing inward"  
+- ❌ "KNEE VALGUS — Injury risk! Knees collapsing inward"  
 -    → Correction: "Push knees OUT over pinky toes"
-
-- ❌ "Leaning forward — engage your core"
--    → Correction: "Chest proud — lift sternum toward ceiling"
 ```
 
 ---
@@ -121,9 +92,7 @@ pip install -e .
 python run_webapp.py
 ```
 
-Then open **http://localhost:8000** in your browser.
-
-### Usage Options
+Open **http://localhost:8000** in your browser.
 
 | Method | Command | Description |
 |--------|---------|-------------|
@@ -135,168 +104,117 @@ Then open **http://localhost:8000** in your browser.
 
 ## ✨ Features
 
-<table>
-<tr>
-<td width="50%">
-
-### 🎯 Core Capabilities
-- **Real-time pose estimation** — YOLOv8-pose at 25+ FPS
-- **6 biomechanical rules** — Research-backed thresholds
-- **Multi-person tracking** — Analyze multiple people simultaneously
-- **Rep counting** — Automatic with phase detection
-- **Signal filtering** — One-Euro filter for smooth tracking
-
-</td>
-<td width="50%">
-
-### 🛠️ Technical Excellence
-- **State machine** — Hysteresis prevents false positives
-- **Adaptive frame rate** — Throttles based on server latency
-- **Zone-locking tracker** — Maintains person identity
-- **WebSocket streaming** — Real-time bidirectional comms
-- **Configurable thresholds** — YAML-based settings
-
-</td>
-</tr>
-</table>
+| Feature | Description |
+|---------|-------------|
+| 🎯 **Multi-person tracking** | Analyze multiple people simultaneously with independent rep counting |
+| 📐 **6 biomechanical rules** | Research-backed evaluation from sports science literature |
+| ⚡ **Real-time feedback** | Sub-100ms latency with adaptive frame throttling |
+| 🔧 **Signal processing** | One-Euro filter eliminates keypoint jitter |
+| 📊 **Phase detection** | State machine tracks Standing → Descent → Bottom → Ascent |
+| 🌐 **Web interface** | No installation for end users — just open browser |
 
 ---
 
 ## 🔄 Pipeline
 
-### Data Flow Architecture
+### Data Flow
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                           SQUAT ANALYZER PIPELINE                           │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-     ┌──────────┐      ┌──────────────┐      ┌──────────────┐      ┌──────────┐
-     │  INPUT   │      │    DETECT    │      │   ANALYZE    │      │  OUTPUT  │
-     │──────────│      │──────────────│      │──────────────│      │──────────│
-     │          │      │              │      │              │      │          │
-     │ 📹 Video │─────▶│ 🎯 YOLOv8   │─────▶│ 📐 Angles    │─────▶│ 💬 Text  │
-     │    or    │      │    Pose     │      │    Math      │      │ Feedback │
-     │ 🎥 Webcam│      │              │      │              │      │          │
-     │          │      │ 17 Keypoints │      │ 6 Bio Rules  │      │ 🎨 Visual│
-     └──────────┘      └──────────────┘      └──────────────┘      │ Overlay  │
-                              │                     │              └──────────┘
-                              ▼                     ▼
-                       ┌──────────────┐      ┌──────────────┐
-                       │  🔧 FILTER   │      │  📊 STATE    │
-                       │──────────────│      │──────────────│
-                       │ One-Euro     │      │ Phase Machine│
-                       │ Adaptive LP  │      │ Rep Counter  │
-                       └──────────────┘      └──────────────┘
+```mermaid
+flowchart LR
+    A[📹 Camera Input] --> B[🎯 YOLOv8-pose]
+    B --> C[🔧 One-Euro Filter]
+    C --> D[📐 Angle Calculator]
+    D --> E[🧠 Biomechanics Engine]
+    E --> F[📊 State Machine]
+    F --> G[💬 Feedback Generator]
+    G --> H[🖥️ Display Output]
 ```
 
 ### Processing Steps
 
-| Step | Component | Function | Output |
-|------|-----------|----------|--------|
-| 1️⃣ | **Frame Capture** | Resize to 640px | Optimized image |
-| 2️⃣ | **Pose Detection** | YOLOv8-pose inference | 17 keypoints + confidence |
-| 3️⃣ | **Signal Filter** | One-Euro adaptive filter | Smoothed keypoints |
-| 4️⃣ | **Angle Calculation** | Vector math | Joint angles (knee, hip, torso) |
-| 5️⃣ | **Rule Evaluation** | 6 biomechanical checks | Pass/Warn/Fail status |
-| 6️⃣ | **Phase Detection** | State machine transition | Current squat phase |
-| 7️⃣ | **Feedback Generation** | Priority-based selection | Top 3 messages |
-| 8️⃣ | **Rendering** | Overlay on frame | Annotated output |
+| Step | Component | Input | Output |
+|:----:|-----------|-------|--------|
+| 1️⃣ | **Frame Capture** | Raw video | Resized 640px frame |
+| 2️⃣ | **Pose Detection** | Frame | 17 COCO keypoints |
+| 3️⃣ | **Signal Filter** | Raw keypoints | Smoothed keypoints |
+| 4️⃣ | **Angle Calculation** | Keypoints | Joint angles |
+| 5️⃣ | **Rule Evaluation** | Angles | Pass/Warn/Fail |
+| 6️⃣ | **Phase Detection** | Angles | Squat phase |
+| 7️⃣ | **Feedback** | Results | Prioritized messages |
 
 ---
 
-## 🏗️ System Architecture
+## 🏗️ Architecture
 
-### Component Diagram
+### System Overview
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                              SQUAT ANALYZER                                 │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │                         PRESENTATION LAYER                          │   │
-│  ├─────────────────────────────────────────────────────────────────────┤   │
-│  │  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐             │   │
-│  │  │   Web UI    │    │  WebSocket  │    │  REST API   │             │   │
-│  │  │  (HTML/JS)  │◄──▶│   Handler   │◄──▶│  Endpoints  │             │   │
-│  │  └─────────────┘    └─────────────┘    └─────────────┘             │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                    │                                        │
-│                                    ▼                                        │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │                         APPLICATION LAYER                           │   │
-│  ├─────────────────────────────────────────────────────────────────────┤   │
-│  │  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐             │   │
-│  │  │   Session   │    │   Multi-    │    │  Feedback   │             │   │
-│  │  │   Manager   │───▶│   Person    │───▶│  Generator  │             │   │
-│  │  │             │    │   Tracker   │    │             │             │   │
-│  │  └─────────────┘    └─────────────┘    └─────────────┘             │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                    │                                        │
-│                                    ▼                                        │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │                           DOMAIN LAYER                              │   │
-│  ├─────────────────────────────────────────────────────────────────────┤   │
-│  │  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐             │   │
-│  │  │ Biomechanics│    │   Squat     │    │   Angle     │             │   │
-│  │  │   Engine    │◄──▶│  Detector   │◄──▶│ Calculator  │             │   │
-│  │  │  (6 Rules)  │    │(State Mach) │    │             │             │   │
-│  │  └─────────────┘    └─────────────┘    └─────────────┘             │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                    │                                        │
-│                                    ▼                                        │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │                        INFRASTRUCTURE LAYER                          │   │
-│  ├─────────────────────────────────────────────────────────────────────┤   │
-│  │  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐             │   │
-│  │  │    Pose     │    │  One-Euro   │    │   Overlay   │             │   │
-│  │  │  Estimator  │    │   Filter    │    │  Renderer   │             │   │
-│  │  │  (YOLOv8)   │    │             │    │             │             │   │
-│  │  └─────────────┘    └─────────────┘    └─────────────┘             │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Presentation["🖥️ Presentation Layer"]
+        UI[Web UI<br/>HTML/JS]
+        WS[WebSocket<br/>Handler]
+        REST[REST API<br/>Endpoints]
+    end
+    
+    subgraph Application["⚙️ Application Layer"]
+        SM[Session<br/>Manager]
+        MPT[Multi-Person<br/>Tracker]
+        FG[Feedback<br/>Generator]
+    end
+    
+    subgraph Domain["🧠 Domain Layer"]
+        BE[Biomechanics<br/>Engine]
+        SD[Squat<br/>Detector]
+        AC[Angle<br/>Calculator]
+    end
+    
+    subgraph Infrastructure["🔧 Infrastructure Layer"]
+        PE[Pose Estimator<br/>YOLOv8]
+        OF[One-Euro<br/>Filter]
+        OR[Overlay<br/>Renderer]
+    end
+    
+    UI <--> WS
+    WS <--> SM
+    SM --> MPT
+    MPT --> FG
+    FG --> BE
+    BE <--> SD
+    SD <--> AC
+    AC --> PE
+    PE --> OF
+    FG --> OR
 ```
 
 ### Directory Structure
 
 ```
 squat-analyzer/
-│
-├── 📁 src/squat_analyzer/           # Core package
-│   ├── 📁 core/                     # Foundation components
-│   │   ├── pose_estimator.py        #   YOLOv8 wrapper
-│   │   ├── keypoints.py             #   COCO keypoint mapping
-│   │   └── angles.py                #   Vector mathematics
+├── 📁 src/squat_analyzer/
+│   ├── 📁 core/                    # Foundation
+│   │   ├── pose_estimator.py       # YOLOv8 wrapper
+│   │   ├── keypoints.py            # COCO keypoint mapping
+│   │   └── angles.py               # Vector mathematics
 │   │
-│   ├── 📁 analysis/                 # Intelligence layer
-│   │   ├── biomechanics.py          #   6 rule classes (Strategy pattern)
-│   │   ├── squat_detector.py        #   FSM + rep counting
-│   │   ├── feedback.py              #   Priority message generation
-│   │   └── multi_person_tracker.py  #   Zone-locking tracker
+│   ├── 📁 analysis/                # Intelligence
+│   │   ├── biomechanics.py         # 6 rule classes
+│   │   ├── squat_detector.py       # FSM + rep counting
+│   │   ├── feedback.py             # Message generation
+│   │   └── multi_person_tracker.py # Zone-locking tracker
 │   │
-│   ├── 📁 filtering/                # Signal processing
-│   │   └── one_euro.py              #   Adaptive noise filter
+│   ├── 📁 filtering/               # Signal processing
+│   │   └── one_euro.py             # Adaptive noise filter
 │   │
-│   └── 📁 visualization/            # Output rendering
-│       └── renderer.py              #   Skeleton + feedback overlay
+│   └── 📁 visualization/           # Output
+│       └── renderer.py             # Skeleton overlay
 │
-├── 📁 webapp/                       # Web interface
-│   ├── server.py                    #   FastAPI + WebSocket server
-│   └── 📁 static/
-│       └── index.html               #   Single-page application
+├── 📁 webapp/                      # Web interface
+│   ├── server.py                   # FastAPI server
+│   └── 📁 static/index.html        # SPA
 │
-├── 📁 demo_videos/                  # Test videos (9 included)
-├── 📁 tests/                        # Pytest suite
-├── 📁 config/                       # YAML configuration
-├── 📁 presentation/                 # HTML presentation
-│
-├── README.md                        # This file
-├── TECHNICAL_DOCUMENTATION.md       # Deep technical reference
-├── CONTRIBUTING.md                  # Contribution guidelines
-├── pyproject.toml                   # Package configuration
-└── run_webapp.py                    # Entry point
+├── 📁 demo_videos/                 # 9 test videos
+├── 📁 presentation/                # HTML slides
+└── 📁 tests/                       # Pytest suite
 ```
 
 ---
@@ -305,44 +223,41 @@ squat-analyzer/
 
 ### The 6 Research-Backed Rules
 
-```
-┌────────────────────────────────────────────────────────────────────────────┐
-│                         BIOMECHANICAL EVALUATION                           │
-├────────────────────────────────────────────────────────────────────────────┤
-│                                                                            │
-│   ┌──────────────┐  ┌──────────────┐  ┌──────────────┐                    │
-│   │ 1. KNEE      │  │ 2. KNEE      │  │ 3. TORSO     │                    │
-│   │    FLEXION   │  │    VALGUS    │  │    ANGLE     │                    │
-│   │──────────────│  │──────────────│  │──────────────│                    │
-│   │ Optimal:     │  │ Safe:        │  │ Normal:      │                    │
-│   │ 70° - 135°   │  │ < 10°        │  │ 30° - 75°    │                    │
-│   │              │  │              │  │              │                    │
-│   │ 📊 Angle     │  │ 📏 Distance  │  │ 📐 Angle     │                    │
-│   └──────────────┘  └──────────────┘  └──────────────┘                    │
-│                                                                            │
-│   ┌──────────────┐  ┌──────────────┐  ┌──────────────┐                    │
-│   │ 4. KNEE      │  │ 5. HIP       │  │ 6. DEPTH     │                    │
-│   │    OVER TOE  │  │    HINGE     │  │    CHECK     │                    │
-│   │──────────────│  │──────────────│  │──────────────│                    │
-│   │ Safe:        │  │ Proper:      │  │ Parallel:    │                    │
-│   │ < 15%        │  │ 45° - 100°   │  │ ratio > 0.5  │                    │
-│   │              │  │              │  │              │                    │
-│   │ 📏 Ratio     │  │ 📐 Angle     │  │ 📊 Ratio     │                    │
-│   └──────────────┘  └──────────────┘  └──────────────┘                    │
-│                                                                            │
-└────────────────────────────────────────────────────────────────────────────┘
-```
+| # | Rule | Method | Threshold | Reference |
+|:-:|------|--------|:---------:|-----------|
+| 1 | **Knee Flexion** | Hip-knee-ankle angle | 70°-135° | Schoenfeld 2010 |
+| 2 | **Knee Valgus** | Lateral deviation from hip-ankle line | <10° | Hewett 2005 |
+| 3 | **Torso Inclination** | Shoulder-hip vector vs vertical | 30°-75° | Escamilla 2001 |
+| 4 | **Knee-Over-Toe** | Horizontal knee extension ratio | <15% | Fry 2003 |
+| 5 | **Hip Hinge** | Torso-thigh angle | 45°-100° | Hartmann 2013 |
+| 6 | **Depth Check** | Hip-to-ankle vertical ratio | >0.5 | NSCA |
 
-### Detailed Rule Specifications
+### Rule Computation
 
-| # | Rule | Computation | Threshold | Reference |
-|---|------|-------------|-----------|-----------|
-| 1 | **Knee Flexion** | `angle(hip→knee, ankle→knee)` | 70°-135° optimal | Schoenfeld 2010 |
-| 2 | **Knee Valgus** | `perpendicular_dist(knee, hip_ankle_line)` | <10° safe | Hewett 2005 |
-| 3 | **Torso Inclination** | `angle(shoulder-hip, vertical)` | 30°-75° | Escamilla 2001 |
-| 4 | **Knee-Over-Toe** | `(knee_x - ankle_x) / stance_width` | <15% forward | Fry 2003 |
-| 5 | **Hip Hinge** | `angle(torso, thigh)` | 45°-100° | Hartmann 2013 |
-| 6 | **Depth Check** | `(hip_y - shoulder_y) / (ankle_y - shoulder_y)` | >0.5 parallel | NSCA |
+```mermaid
+flowchart LR
+    subgraph Input
+        K[Keypoints]
+    end
+    
+    subgraph Rules["6 Biomechanical Rules"]
+        R1[1. Knee Flexion<br/>📐 Angle]
+        R2[2. Knee Valgus<br/>📏 Distance]
+        R3[3. Torso Angle<br/>📐 Angle]
+        R4[4. Knee-Over-Toe<br/>📊 Ratio]
+        R5[5. Hip Hinge<br/>📐 Angle]
+        R6[6. Depth Check<br/>📊 Ratio]
+    end
+    
+    subgraph Output
+        P[✅ Pass]
+        W[⚠️ Warning]
+        F[❌ Fail]
+    end
+    
+    K --> R1 & R2 & R3 & R4 & R5 & R6
+    R1 & R2 & R3 & R4 & R5 & R6 --> P & W & F
+```
 
 ---
 
@@ -350,69 +265,46 @@ squat-analyzer/
 
 ### Squat Phase Detection
 
+```mermaid
+stateDiagram-v2
+    [*] --> STANDING
+    
+    STANDING --> DESCENDING: ratio < 0.85
+    DESCENDING --> BOTTOM: ratio < 0.60
+    BOTTOM --> ASCENDING: velocity > 0
+    ASCENDING --> STANDING: ratio > 0.90
+    
+    STANDING --> STANDING: REP COUNTED ✓
+    
+    note right of STANDING
+        Hysteresis thresholds
+        prevent oscillation
+    end note
 ```
-                           ┌─────────────────────────────────────┐
-                           │         SQUAT PHASE MACHINE         │
-                           └─────────────────────────────────────┘
 
-    ┌─────────────┐     ratio < 0.85      ┌─────────────┐
-    │             │ ────────────────────▶ │             │
-    │  STANDING   │                       │ DESCENDING  │
-    │             │ ◀──────────────────── │             │
-    └─────────────┘     ratio > 0.90      └─────────────┘
-           ▲                                     │
-           │                              ratio < 0.60
-           │                                     ▼
-           │         ratio > 0.90         ┌─────────────┐
-           │  ◀────────────────────────── │             │
-           │                              │   BOTTOM    │
-    ┌─────────────┐                       │             │
-    │             │                       └─────────────┘
-    │  ASCENDING  │ ◀──────────────────────────┘
-    │             │      velocity > 0
-    └─────────────┘
-           │
-           │  ratio > 0.90
-           ▼
-    ┌─────────────┐
-    │ REP COUNTED │ ──▶ Back to STANDING
-    │     ✓       │
-    └─────────────┘
-
-
-    Hysteresis: Different thresholds for enter (0.85) vs exit (0.90)
-                prevents oscillation at phase boundaries
-```
+**Hysteresis**: Different thresholds for enter (0.85) vs exit (0.90) prevents false transitions at boundaries.
 
 ---
 
-## 📈 Performance Benchmarks
+## 📈 Benchmarks
 
-### Hardware Configurations
+### Performance by Configuration
 
-| Configuration | FPS | Latency | Memory | Notes |
-|--------------|:---:|:-------:|:------:|-------|
-| 🖥️ **CPU** (i7-10750H) | 22 | 45ms | 480MB | No GPU required |
-| 🎮 **GPU** (RTX 3060) | 68 | 15ms | 1.2GB | CUDA acceleration |
-| 🌐 **WebSocket** | 18 | 68ms | 520MB | Browser-based |
-| 📱 **Raspberry Pi 4** | 8 | 125ms | 400MB | Edge deployment |
+| Configuration | FPS | Latency | Memory |
+|:--------------|:---:|:-------:|:------:|
+| 🖥️ CPU (i7-10750H) | 22 | 45ms | 480MB |
+| 🎮 GPU (RTX 3060) | 68 | 15ms | 1.2GB |
+| 🌐 WebSocket | 18 | 68ms | 520MB |
+| 📱 Raspberry Pi 4 | 8 | 125ms | 400MB |
 
 ### Optimizations Applied
 
-```
-┌────────────────────────────────────────────────────────────────┐
-│                    PERFORMANCE OPTIMIZATIONS                   │
-├────────────────────────────────────────────────────────────────┤
-│                                                                │
-│  ✅ Frame resize to 640px ─────────────────▶ 4x speedup       │
-│  ✅ Adaptive frame throttling ─────────────▶ Stable latency   │
-│  ✅ One-Euro filter (not Kalman) ──────────▶ Lower compute    │
-│  ✅ YOLOv8n (nano) model ──────────────────▶ 2.4M params      │
-│  ✅ Confidence threshold 0.5 ──────────────▶ Skip low-quality │
-│  ✅ Zone-locking (not re-ID) ──────────────▶ O(1) tracking    │
-│                                                                │
-└────────────────────────────────────────────────────────────────┘
-```
+- ✅ Frame resize to 640px → **4x speedup**
+- ✅ Adaptive frame throttling → **Stable latency**
+- ✅ One-Euro filter (not Kalman) → **Lower compute**
+- ✅ YOLOv8n nano model → **2.4M params only**
+- ✅ Confidence threshold 0.5 → **Skip low-quality**
+- ✅ Zone-locking tracker → **O(1) tracking**
 
 ---
 
@@ -424,25 +316,19 @@ squat-analyzer/
 from squat_analyzer.core import PoseEstimator
 from squat_analyzer.analysis import BiomechanicsEngine, SquatDetector
 
-# ═══════════════════════════════════════════════════════════════
-# INITIALIZATION
-# ═══════════════════════════════════════════════════════════════
+# Initialize
 pose = PoseEstimator(model="yolov8n-pose.pt", confidence=0.5)
 engine = BiomechanicsEngine()  # Loads 6 rules
 detector = SquatDetector()     # State machine
 
-# ═══════════════════════════════════════════════════════════════
-# FRAME PROCESSING
-# ═══════════════════════════════════════════════════════════════
+# Process frame
 keypoints = pose.estimate(frame)           # → 17 keypoints
 angles = engine.compute_angles(keypoints)  # → dict of angles
 results = engine.evaluate(keypoints, angles)  # → list of RuleResult
 phase = detector.update(angles)            # → SquatPhase enum
 reps = detector.rep_count                  # → int
 
-# ═══════════════════════════════════════════════════════════════
-# FEEDBACK
-# ═══════════════════════════════════════════════════════════════
+# Get feedback
 for result in results:
     print(f"[{result.status}] {result.message}")
     if result.correction:
@@ -452,23 +338,17 @@ for result in results:
 ### WebSocket API
 
 ```javascript
-// Connect
 const ws = new WebSocket('ws://localhost:8000/ws/analyze/{session_id}');
 
 // Send frame
-ws.send(JSON.stringify({ 
-    frame: base64ImageData,
-    timestamp: Date.now()
-}));
+ws.send(JSON.stringify({ frame: base64ImageData }));
 
 // Receive analysis
 ws.onmessage = (event) => {
     const data = JSON.parse(event.data);
-    
     // data.feedback  → [{text, priority, type}, ...]
     // data.reps      → {person_1: 5, person_2: 3}
     // data.phase     → "DESCENDING"
-    // data.keypoints → [[x,y,conf], ...]
     // data.latency   → 45
 };
 ```
@@ -478,46 +358,34 @@ ws.onmessage = (event) => {
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `GET` | `/` | Web UI |
-| `POST` | `/api/session/start` | Create analysis session |
-| `POST` | `/api/session/{id}/end` | End session, get summary |
-| `GET` | `/api/demo-videos` | List available test videos |
-| `WS` | `/ws/analyze/{id}` | Real-time analysis stream |
+| `POST` | `/api/session/start` | Create session |
+| `POST` | `/api/session/{id}/end` | End session |
+| `GET` | `/api/demo-videos` | List test videos |
+| `WS` | `/ws/analyze/{id}` | Real-time stream |
 
 ---
 
 ## ⚙️ Configuration
 
-### `config/settings.yaml`
+Edit `config/settings.yaml`:
 
 ```yaml
-# ═══════════════════════════════════════════════════════════════
-# POSE ESTIMATION
-# ═══════════════════════════════════════════════════════════════
 pose_estimation:
-  model: yolov8n-pose.pt        # Model variant (n/s/m/l/x)
-  confidence_threshold: 0.5      # Keypoint confidence cutoff
-  max_detections: 10             # Max people to track
+  model: yolov8n-pose.pt
+  confidence_threshold: 0.5
+  max_detections: 10
 
-# ═══════════════════════════════════════════════════════════════
-# BIOMECHANICAL THRESHOLDS
-# ═══════════════════════════════════════════════════════════════
 biomechanics:
   knee_flexion:
-    optimal_range: [70, 135]     # Degrees
+    optimal_range: [70, 135]
   knee_valgus:
-    warning_threshold: 5         # Degrees
+    warning_threshold: 5
     fail_threshold: 10
-  torso_inclination:
-    max_forward_lean: 75         # Degrees from vertical
   
-# ═══════════════════════════════════════════════════════════════
-# SIGNAL PROCESSING  
-# ═══════════════════════════════════════════════════════════════
 filtering:
   one_euro:
-    min_cutoff: 1.0              # Minimum cutoff frequency
-    beta: 0.007                  # Speed coefficient
-    d_cutoff: 1.0                # Derivative cutoff
+    min_cutoff: 1.0
+    beta: 0.007
 ```
 
 ---
@@ -529,30 +397,21 @@ filtering:
 
 ### ✅ Assumptions
 
-| Category | Assumption | Rationale |
-|----------|------------|-----------|
-| **Camera** | Static, frontal/side view | Oblique angles reduce accuracy |
-| **Distance** | 2-4 meters from subject | Too close clips body; too far loses detail |
-| **Lighting** | Adequate (~100+ lux) | Low light causes detection failures |
-| **Clothing** | Fitted, contrasting with background | Baggy clothes occlude joints |
-| **Movement** | Controlled tempo (>250ms/phase) | Fast movements filtered as noise |
+| Category | Assumption |
+|----------|------------|
+| **Camera** | Static, frontal/side view, 2-4m distance |
+| **Lighting** | Adequate (~100+ lux) |
+| **Clothing** | Fitted, contrasting with background |
+| **Movement** | Controlled tempo (>250ms/phase) |
 
 ### ❌ Limitations
 
-| Limitation | Impact | Future Mitigation |
-|------------|--------|-------------------|
-| **2D only** | Cannot detect rotation/twist | Stereo cameras or IMU fusion |
-| **Single exercise** | Squats only | Extensible architecture for other movements |
-| **No load detection** | Barbell position unknown | Object detection for equipment |
-| **Individual variation** | Fixed thresholds | Calibration routine on first use |
-| **Fatigue not modeled** | No rep-over-rep degradation tracking | Longitudinal trend analysis |
-
-### 🔶 Known Edge Cases
-
-- Very tall/short individuals may need threshold calibration
-- Wide-stance sumo squats reduce valgus detection accuracy
-- Heeled weightlifting shoes may trigger false knee-over-toe warnings
-- Multiple overlapping people may cause tracker confusion
+| Limitation | Future Mitigation |
+|------------|-------------------|
+| 2D only (no rotation) | Stereo cameras |
+| Squats only | Extensible architecture |
+| No load detection | Object detection |
+| Fixed thresholds | Calibration routine |
 
 </details>
 
@@ -560,35 +419,29 @@ filtering:
 
 ## 📚 References
 
-1. **Schoenfeld, B.J.** (2010). *Squatting Kinematics and Kinetics and Their Application to Exercise Performance*. Journal of Strength and Conditioning Research.
-
-2. **Hewett, T.E. et al.** (2005). *Biomechanical Measures of Neuromuscular Control and Valgus Loading of the Knee*. American Journal of Sports Medicine.
-
-3. **Escamilla, R.F.** (2001). *Knee Biomechanics of the Dynamic Squat Exercise*. Medicine & Science in Sports & Exercise.
-
-4. **Casiez, G. et al.** (2012). *1€ Filter: A Simple Speed-based Low-pass Filter for Noisy Input in Interactive Systems*. ACM CHI.
-
-5. **Fry, A.C. et al.** (2003). *Effect of Knee Position on Hip and Knee Torques During the Barbell Squat*. Journal of Strength and Conditioning Research.
+1. **Schoenfeld, B.J.** (2010). *Squatting Kinematics and Kinetics*. JSCR.
+2. **Hewett, T.E. et al.** (2005). *Biomechanical Measures of Neuromuscular Control*. AJSM.
+3. **Escamilla, R.F.** (2001). *Knee Biomechanics of the Dynamic Squat*. MSSE.
+4. **Casiez, G. et al.** (2012). *1€ Filter*. ACM CHI.
+5. **Fry, A.C. et al.** (2003). *Effect of Knee Position on Torques*. JSCR.
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ```bash
-# Development setup
 pip install -e ".[dev]"
 pytest                    # Run tests
 ruff check src/ tests/    # Lint
-mypy src/                 # Type check
 ```
 
 ---
 
 ## 📄 License
 
-MIT License — see [LICENSE](LICENSE) for details.
+MIT License — see [LICENSE](LICENSE).
 
 ---
 
@@ -597,7 +450,7 @@ MIT License — see [LICENSE](LICENSE) for details.
 </p>
 
 <p align="center">
-  <a href="https://github.com/Abhishekgupta1223/squat-analyzer">⭐ Star this repo</a> •
-  <a href="https://github.com/Abhishekgupta1223/squat-analyzer/issues">🐛 Report Bug</a> •
-  <a href="https://github.com/Abhishekgupta1223/squat-analyzer/issues">✨ Request Feature</a>
+  <a href="https://github.com/Abhishekgupta1223/squat-analyzer">⭐ Star</a> •
+  <a href="https://github.com/Abhishekgupta1223/squat-analyzer/issues">🐛 Bug</a> •
+  <a href="https://github.com/Abhishekgupta1223/squat-analyzer/issues">✨ Feature</a>
 </p>
