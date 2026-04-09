@@ -1,38 +1,37 @@
-# Squat Analyzer - Production-Grade Pose Analysis System
+# Squat Analyzer - Real-Time Posture Analysis System
 
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![License: MIT](https://img.shields.io/license/MIT-blue.svg)](LICENSE)
+A real-time computer vision system that analyzes squat form and provides corrective feedback using YOLOv8 pose estimation and biomechanics-based evaluation rules.
 
-A **production-grade, research-backed** real-time squat posture analysis system using state-of-the-art computer vision and biomechanical analysis.
+---
 
-## 🎯 Features
+## 📋 Assignment Deliverables Checklist
 
-- **Real-time pose estimation** using YOLOv8-pose (17 keypoints at 30+ FPS)
-- **6 research-validated biomechanical rules** based on sports science literature
-- **Adaptive signal filtering** using One-Euro Filter for smooth tracking
-- **State machine** for precise squat phase detection (Standing → Descending → Bottom → Ascending)
-- **Priority-based feedback** with visual and text overlays
-- **Production-ready** with Docker, CI/CD, comprehensive testing
+| Requirement | Status | Details |
+|-------------|--------|---------|
+| **Identify & track human body** | ✅ | YOLOv8-pose with multi-person tracking |
+| **Extract key body points** | ✅ | 17 COCO keypoints (shoulders, hips, knees, ankles) |
+| **2-3 evaluation rules** | ✅ **Exceeded (6 rules)** | See [Computational Rules](#-computational-rules) |
+| **Correct/Incorrect feedback** | ✅ | Visual overlays + text messages |
+| **Demo interface** | ✅ | Web application at localhost:8000 |
+| **README: Technical approach** | ✅ | This document |
+| **README: Assumptions** | ✅ | See [Assumptions](#-assumptions) |
+| **README: Limitations** | ✅ | See [Limitations](#-limitations) |
+| **README: How to run** | ✅ | See [Quick Start](#-quick-start) |
+| **Demo video** | 📹 | [Link to video] |
 
-## 📊 Biomechanical Analysis
-
-| Rule | Description | Threshold | Reference |
-|------|-------------|-----------|-----------|
-| Knee Flexion | Optimal squat depth | 70° - 135° | Schoenfeld et al., 2010 |
-| Knee Valgus | Prevent inward collapse | < 10° deviation | Hewett et al., 2005 |
-| Torso Inclination | Maintain upright posture | 30° - 75° | Escamilla, 2001 |
-| Hip Hinge | Proper hip mechanics | 45° - 100° | Hartmann et al., 2013 |
-| Knee-Over-Toe | Safe knee positioning | < 15% extension | Fry et al., 2003 |
-| Depth Analysis | Full ROM verification | Thigh parallel check | NSCA Guidelines |
+---
 
 ## 🚀 Quick Start
+
+### Prerequisites
+- Python 3.10+
+- Webcam (optional) or test videos (included)
 
 ### Installation
 
 ```bash
 # Clone repository
-git clone https://github.com/example/squat-analyzer.git
+git clone https://github.com/Abhishekgupta1223/squat-analyzer.git
 cd squat-analyzer
 
 # Create virtual environment
@@ -41,176 +40,253 @@ python -m venv .venv
 # source .venv/bin/activate  # Linux/Mac
 
 # Install dependencies
-pip install -e ".[dev]"
+pip install -e .
 ```
 
-### Run Analysis
+### Run Web Application
 
 ```bash
-# Webcam (default)
-squat-analyzer
-
-# Video file
-squat-analyzer --source path/to/video.mp4
-
-# Image
-squat-analyzer --source path/to/image.jpg --mode image
-
-# RTSP stream
-squat-analyzer --source rtsp://camera/stream
+python run_webapp.py
 ```
 
-### Docker
+Then open **http://localhost:8000** in your browser.
 
-```bash
-# Build image
-docker build -t squat-analyzer .
-
-# Run with webcam (Linux with X11)
-docker run -it --rm \
-    --device=/dev/video0 \
-    -e DISPLAY=$DISPLAY \
-    -v /tmp/.X11-unix:/tmp/.X11-unix \
-    squat-analyzer
-```
-
-## 🏗️ Architecture
-
-```
-squat_analyzer/
-├── src/
-│   └── squat_analyzer/
-│       ├── core/           # Pose estimation & angle computation
-│       ├── analysis/       # Biomechanical rules & squat detection
-│       ├── filtering/      # Signal processing (One-Euro Filter)
-│       ├── visualization/  # Real-time overlays
-│       ├── config/         # Pydantic settings management
-│       └── utils/          # Logging, metrics, helpers
-├── tests/                  # Comprehensive pytest suite
-├── config/                 # YAML configuration files
-├── docker/                 # Docker & compose files
-└── docs/                   # Documentation
-```
-
-## 🧪 Testing
-
-```bash
-# Run all tests
-pytest
-
-# With coverage
-pytest --cov=squat_analyzer --cov-report=html
-
-# Type checking
-mypy src/
-
-# Linting
-ruff check src/ tests/
-```
-
-## 📈 Performance
-
-| Metric | Value |
-|--------|-------|
-| FPS (YOLOv8n-pose, CPU) | ~15-25 |
-| FPS (YOLOv8n-pose, GPU) | ~50-80 |
-| Latency (detection) | ~20-40ms |
-| Memory Usage | ~500MB |
+**Features:**
+- Upload video files for analysis
+- Use webcam for real-time feedback
+- 9 demo videos included for testing
 
 ---
 
-## ⚠️ Assumptions & Limitations
+## 🔬 Technical Approach
 
-### Assumptions
+### 1. Pose Estimation
+- **Model:** YOLOv8-pose (nano variant) from Ultralytics
+- **Output:** 17 COCO keypoints per detected person
+- **Performance:** ~15-25 FPS on CPU, ~50-80 FPS on GPU
 
-#### Camera & Environment
+### 2. Keypoints Used
+| Index | Keypoint | Purpose |
+|-------|----------|---------|
+| 5, 6 | Left/Right Shoulder | Torso angle calculation |
+| 11, 12 | Left/Right Hip | Hip flexion, depth reference |
+| 13, 14 | Left/Right Knee | Knee angle, valgus detection |
+| 15, 16 | Left/Right Ankle | Depth ratio, knee-over-toe |
+
+### 3. Signal Processing
+- **One-Euro Filter:** Adaptive low-pass filter to reduce keypoint jitter
+- **Hysteresis State Machine:** Prevents false phase transitions using dual thresholds
+
+### 4. Squat Phase Detection
+```
+STANDING → DESCENDING → BOTTOM → ASCENDING → STANDING (rep complete)
+```
+
+---
+
+## 📐 Computational Rules
+
+### Rule 1: Knee Flexion (Squat Depth)
+**Method:** Angular measurement between hip-knee-ankle vectors
+
+```
+angle = arccos(dot(hip→knee, ankle→knee) / (|hip→knee| × |ankle→knee|))
+```
+
+| Evaluation | Threshold |
+|------------|-----------|
+| ✅ Optimal depth | 70° - 135° |
+| ⚠️ Too shallow | > 135° |
+| ⚠️ Excessive depth | < 70° |
+
+**Reference:** Schoenfeld (2010) - Squatting Kinematics and Kinetics
+
+---
+
+### Rule 2: Torso Inclination (Back Angle)
+**Method:** Angle between torso vector and vertical axis
+
+```
+torso = shoulder_midpoint - hip_midpoint
+angle = arccos(dot(torso, vertical) / |torso|)
+```
+
+| Evaluation | Threshold |
+|------------|-----------|
+| ✅ Good posture | 30° - 75° |
+| ⚠️ Forward lean | > 75° |
+
+**Reference:** Escamilla (2001) - Knee Biomechanics of Dynamic Squat
+
+---
+
+### Rule 3: Knee Valgus (Knee Collapse)
+**Method:** Lateral deviation of knees relative to hip-ankle line
+
+```
+deviation = perpendicular_distance(knee, hip_ankle_line)
+valgus_angle = arctan(deviation / hip_ankle_distance)
+```
+
+| Evaluation | Threshold |
+|------------|-----------|
+| ✅ Tracking well | < 5° |
+| ⚠️ Slight valgus | 5° - 10° |
+| ❌ Injury risk | > 10° |
+
+**Reference:** Hewett et al. (2005) - Biomechanical Measures of Neuromuscular Control
+
+---
+
+### Rule 4: Knee-Over-Toe Position
+**Method:** Horizontal distance ratio
+
+```
+forward_extension = (knee_x - ankle_x) / (hip_x - ankle_x)
+```
+
+| Evaluation | Threshold |
+|------------|-----------|
+| ✅ Safe position | < 15% extension |
+| ⚠️ Moderate forward | 15% - 25% |
+
+**Reference:** Fry et al. (2003) - Effect of Knee Position on Torques
+
+---
+
+### Rule 5: Hip Hinge Initiation
+**Method:** Hip flexion angle measurement
+
+```
+angle = arccos(dot(torso, thigh) / (|torso| × |thigh|))
+```
+
+| Evaluation | Threshold |
+|------------|-----------|
+| ✅ Proper hinge | 45° - 100° |
+
+**Reference:** Hartmann et al. (2013) - Load Analysis on Knee Joint
+
+---
+
+### Rule 6: Depth Verification (Hip-to-Knee Ratio)
+**Method:** Vertical position ratio using shoulder-ankle reference
+
+```
+depth_ratio = (hip_y - shoulder_y) / (ankle_y - shoulder_y)
+```
+
+| Evaluation | Threshold |
+|------------|-----------|
+| ✅ Parallel or below | ratio > 0.5 |
+
+**Reference:** NSCA Guidelines for Exercise Technique
+
+---
+
+## 💬 Feedback Examples
+
+### Correct Posture
+```
+✅ "Excellent depth! Knee angle 95° is optimal"
+✅ "Good torso position - spine neutral"  
+✅ "Knees tracking well over toes"
+```
+
+### Incorrect Posture (with corrections)
+```
+❌ "Squat depth insufficient - hips too high"
+   → Correction: "Sit back and down. Imagine sitting into a low chair"
+
+❌ "⚠️ KNEE VALGUS - Injury risk! Knees collapsing inward"
+   → Correction: "Push knees OUT over pinky toes"
+
+❌ "Leaning forward - engage your core"
+   → Correction: "Chest proud - lift sternum toward ceiling"
+```
+
+---
+
+## ⚠️ Assumptions
+
+### Camera & Environment
 | Assumption | Rationale |
 |------------|-----------|
-| **Single-plane view** | System assumes frontal or sagittal (side) camera view. Oblique angles reduce accuracy. |
-| **Adequate lighting** | Minimum ~100 lux ambient light required for reliable keypoint detection. |
-| **Static camera** | Camera should be stationary; handheld footage causes tracking instability. |
-| **Full-body visibility** | Subject must be fully visible from head to feet for accurate depth assessment. |
-| **Distance 2-4 meters** | Optimal detection occurs at medium distance; too close clips body, too far reduces keypoint precision. |
+| **Single-plane view** | Frontal or side camera view required; oblique angles reduce accuracy |
+| **Adequate lighting** | Minimum ~100 lux for reliable keypoint detection |
+| **Static camera** | Handheld footage causes tracking instability |
+| **Full-body visibility** | Subject must be fully visible head to feet |
+| **Distance 2-4 meters** | Too close clips body; too far reduces precision |
 
-#### Subject & Movement
+### Subject & Movement
 | Assumption | Rationale |
 |------------|-----------|
-| **Upright starting position** | Calibration assumes ~180° knee angle at standing. Non-standard start positions may miscalibrate depth ratios. |
-| **Controlled tempo** | Rapid/ballistic movements (< 250ms per phase) may be rejected as noise. |
-| **Standard anthropometry** | Thresholds derived from average adult proportions; extreme body types may trigger false warnings. |
-| **Minimal occlusion** | Baggy clothing, objects, or self-occlusion (crossed arms) degrades pose estimation. |
-
-#### Technical Dependencies
-| Assumption | Rationale |
-|------------|-----------|
-| **YOLOv8 keypoint accuracy** | Rules depend on COCO-format 17-keypoint detection; different models may require threshold recalibration. |
-| **2D projection suffices** | 3D joint angles approximated from 2D projections; true 3D would require depth cameras or multi-view. |
-| **Stable frame rate** | Filtering algorithms assume ~15-30 FPS input; severe frame drops cause detection discontinuities. |
+| **Upright starting position** | Calibration assumes ~180° knee angle when standing |
+| **Controlled tempo** | Movements faster than 250ms per phase may be filtered as noise |
+| **Standard proportions** | Thresholds based on average adult anthropometry |
+| **Minimal occlusion** | Baggy clothing or crossed arms degrade detection |
 
 ---
 
-### Limitations
+## 🚧 Limitations
 
-#### Accuracy Constraints
+### Accuracy Limitations
+| Limitation | Impact |
+|------------|--------|
+| **2D estimation only** | Cannot detect rotation or twist |
+| **Keypoint jitter** | Filtered but not eliminated |
+| **Occlusion sensitivity** | Equipment/hands can hide joints |
+| **Lighting dependent** | Low light causes failures |
 
-| Limitation | Impact | Mitigation |
-|------------|--------|------------|
-| **2D pose estimation** | Cannot detect rotation/twist (e.g., asymmetric torso rotation) | Future: stereo cameras or IMU fusion |
-| **Keypoint jitter** | Small oscillations in detection cause score fluctuation | One-Euro adaptive filtering applied |
-| **Occlusion sensitivity** | Hands on hips, crossed arms, or equipment can hide keypoints | Confidence-based rejection implemented |
-| **Lighting sensitivity** | Low light or backlighting causes detection failures | Recommend front-lighting setup |
-| **Multi-person interference** | Overlapping subjects may cause track switching | Zone-locking tracker mitigates this |
+### Biomechanical Limitations
+| Limitation | Impact |
+|------------|--------|
+| **Individual variation** | Optimal angles vary by anatomy |
+| **Single movement type** | Tuned for squats only |
+| **No load detection** | Barbell position not considered |
+| **Fatigue not tracked** | No rep-over-rep trend analysis |
 
-#### Biomechanical Constraints
-
-| Limitation | Impact | Mitigation |
-|------------|--------|------------|
-| **Individual variation** | Optimal angles vary by anatomy (femur length, hip structure) | Configurable thresholds in `settings.yaml` |
-| **Movement style agnostic** | High-bar vs low-bar squat have different optimal torso angles | Single rule set; advanced users can customize |
-| **No load consideration** | Barbell position affects mechanics but isn't detected | Designed for bodyweight/light load assessment |
-| **Fatigue not modeled** | Form degrades with fatigue; system doesn't track rep-over-rep changes | Future: longitudinal trend analysis |
-
-#### System Constraints
-
-| Limitation | Impact | Mitigation |
-|------------|--------|------------|
-| **CPU-bound inference** | ~15-25 FPS on CPU limits real-time feedback speed | GPU acceleration available; frame resizing to 640px |
-| **Network latency (webapp)** | WebSocket round-trip adds ~50-100ms to feedback loop | Adaptive frame throttling implemented |
-| **No audio feedback** | Visual-only output; users must watch screen | Future: text-to-speech integration |
-| **Single exercise** | System tuned for squats only | Architecture extensible to other movements |
+### System Limitations
+| Limitation | Impact |
+|------------|--------|
+| **CPU-bound** | ~15-25 FPS without GPU |
+| **Network latency** | WebSocket adds ~50-100ms |
+| **Visual feedback only** | No audio output |
 
 ---
 
-### Known Edge Cases
+## 📁 Project Structure
 
 ```
-1. Very tall/short individuals → Depth ratios may need manual calibration
-2. Wide-stance sumo squats → Valgus detection less reliable
-3. Heeled shoes (weightlifting) → Knee-over-toe thresholds may be too strict
-4. Pregnancy/injury accommodation → Thresholds not medically validated
-5. Children → Model trained on adult proportions; accuracy unverified
+squat-analyzer/
+├── src/squat_analyzer/
+│   ├── core/              # Pose estimation, keypoints, angles
+│   ├── analysis/          # Biomechanics rules, squat detection
+│   ├── filtering/         # One-Euro signal filter
+│   └── visualization/     # Skeleton overlay rendering
+├── webapp/                # FastAPI server + web UI
+├── demo_videos/           # 9 test videos included
+├── tests/                 # Unit tests
+├── README.md              # This file
+└── TECHNICAL_DOCUMENTATION.md  # Detailed technical deep-dive
 ```
 
 ---
 
-### Recommendations for Best Results
+## 📚 References
 
-1. **Camera placement**: Position camera at hip height, 2-3 meters away, perpendicular to movement plane
-2. **Lighting**: Ensure even, front-facing light; avoid backlighting from windows
-3. **Clothing**: Wear fitted clothing; avoid loose/baggy items that obscure joint positions
-4. **Background**: Plain, uncluttered background improves detection confidence
-5. **Warm-up**: Perform 2-3 calibration squats before formal assessment
-
----
-
-## 📚 Research References
-
-1. Schoenfeld, B.J. (2010). *Squatting Kinematics and Kinetics and Their Application to Exercise Performance*. JSCR.
+1. Schoenfeld, B.J. (2010). *Squatting Kinematics and Kinetics*. JSCR.
 2. Hewett, T.E. et al. (2005). *Biomechanical Measures of Neuromuscular Control*. AJSM.
-3. Escamilla, R.F. (2001). *Knee biomechanics of the dynamic squat exercise*. MSSE.
-4. Hartmann, H. et al. (2013). *Analysis of the Load on the Knee Joint and Vertebral Column*. Sports Medicine.
-5. Fry, A.C. et al. (2003). *Effect of Knee Position on Hip and Knee Torques*. JSCR.
+3. Escamilla, R.F. (2001). *Knee biomechanics of the dynamic squat*. MSSE.
+4. Hartmann, H. et al. (2013). *Load Analysis on Knee Joint*. Sports Medicine.
+5. Fry, A.C. et al. (2003). *Effect of Knee Position on Torques*. JSCR.
+
+---
 
 ## 📄 License
 
 MIT License - See [LICENSE](LICENSE) for details.
+
+---
+
+*For detailed implementation specifics, see [TECHNICAL_DOCUMENTATION.md](TECHNICAL_DOCUMENTATION.md)*
