@@ -1,0 +1,128 @@
+# =============================================================================
+# Squat Analyzer Configuration
+# =============================================================================
+# Production-grade settings with research-backed defaults.
+# All thresholds derived from sports science literature.
+# =============================================================================
+
+# Application Settings
+app_name: "Squat Analyzer"
+debug: false
+log_level: "INFO"
+mode: "realtime"  # realtime, video, image
+
+# -----------------------------------------------------------------------------
+# Pose Estimation Configuration
+# -----------------------------------------------------------------------------
+pose:
+  model: "yolov8n-pose"  # yolov8n/s/m/l/x-pose
+  confidence_threshold: 0.5
+  device: "auto"  # auto, cpu, cuda, mps
+  half_precision: false  # FP16 for GPU acceleration
+
+# -----------------------------------------------------------------------------
+# Biomechanical Rules Configuration
+# Research-backed thresholds for safe and effective squatting
+# -----------------------------------------------------------------------------
+rules:
+  # Knee Flexion Angle (Schoenfeld, 2010)
+  # Optimal muscle activation at 70°-135°
+  knee_flexion:
+    enabled: true
+    severity: 8  # 1-10 scale
+    min_threshold: 70.0   # degrees - too shallow above this
+    max_threshold: 135.0  # degrees - standing position
+    description: "Monitors knee flexion for proper squat depth"
+  
+  # Knee Valgus Detection (Hewett et al., 2005)
+  # Critical for ACL injury prevention
+  knee_valgus:
+    enabled: true
+    severity: 9  # High severity - injury risk
+    max_threshold: 10.0  # degrees - maximum safe inward angle
+    description: "Detects dangerous knee inward collapse"
+  
+  # Torso Inclination (Escamilla, 2001)
+  # Spine safety during loaded squats
+  torso_inclination:
+    enabled: true
+    severity: 7
+    min_threshold: 30.0   # degrees - too upright (rare issue)
+    max_threshold: 75.0   # degrees - excessive forward lean
+    description: "Monitors torso angle to protect spine"
+  
+  # Hip Hinge Mechanics (Hartmann et al., 2013)
+  # Proper posterior chain engagement
+  hip_hinge:
+    enabled: true
+    severity: 6
+    min_threshold: 45.0   # degrees
+    max_threshold: 100.0  # degrees
+    description: "Ensures proper hip hinge mechanics"
+  
+  # Knee-Over-Toe Position (Fry et al., 2003)
+  # Patellofemoral stress management
+  knee_over_toe:
+    enabled: true
+    severity: 5
+    max_threshold: 0.15  # Ratio - 15% past toe allowed
+    description: "Monitors safe knee positioning relative to toes"
+  
+  # Depth Analysis (NSCA Guidelines)
+  # Range of motion verification
+  depth_analysis:
+    enabled: true
+    severity: 5
+    min_threshold: 0.0   # degrees below parallel (ATG = negative)
+    max_threshold: 15.0  # degrees above parallel tolerance
+    description: "Verifies proper squat depth"
+
+# -----------------------------------------------------------------------------
+# Signal Processing - One-Euro Filter
+# Adaptive smoothing for jitter reduction
+# -----------------------------------------------------------------------------
+filter:
+  enabled: true
+  min_cutoff: 1.0    # Lower = smoother, higher = more responsive
+  beta: 0.007        # Speed coefficient
+  d_cutoff: 1.0      # Derivative cutoff
+
+# -----------------------------------------------------------------------------
+# Visualization Configuration
+# -----------------------------------------------------------------------------
+visualization:
+  show_skeleton: true
+  show_keypoints: true
+  show_angles: true
+  show_feedback: true
+  show_metrics: true
+  show_phase: true
+  
+  skeleton_color: [0, 255, 0]    # Green - BGR format
+  keypoint_color: [255, 0, 0]    # Blue
+  warning_color: [0, 165, 255]   # Orange
+  error_color: [0, 0, 255]       # Red
+  success_color: [0, 255, 0]     # Green
+  
+  line_thickness: 2
+  keypoint_radius: 5
+  font_scale: 0.6
+
+# -----------------------------------------------------------------------------
+# Camera/Video Source Configuration
+# -----------------------------------------------------------------------------
+camera:
+  source: 0          # 0 = default webcam, or path to video/RTSP URL
+  width: 1280
+  height: 720
+  fps: 30
+  buffer_size: 1     # Lower = less latency
+
+# -----------------------------------------------------------------------------
+# Performance Tuning
+# -----------------------------------------------------------------------------
+performance:
+  target_fps: 30
+  skip_frames: 0        # Skip N frames between analyses (0 = analyze all)
+  async_processing: false
+  gpu_acceleration: true

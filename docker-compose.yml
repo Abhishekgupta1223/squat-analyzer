@@ -1,0 +1,56 @@
+# =============================================================================
+# Docker Compose Configuration for Squat Analyzer
+# =============================================================================
+
+version: "3.9"
+
+services:
+  # Main application service
+  squat-analyzer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: squat-analyzer
+    
+    # For webcam access (Linux)
+    devices:
+      - "/dev/video0:/dev/video0"
+    
+    # For X11 display (Linux)
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+      - QT_X11_NO_MITSHM=1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ./config:/app/config:ro
+      - ./output:/app/output:rw
+    
+    # Enable GPU if available
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    
+    # Interactive mode for real-time analysis
+    stdin_open: true
+    tty: true
+    
+    command: ["--source", "0"]
+
+  # Development service with hot reload
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: squat-analyzer-dev
+    volumes:
+      - .:/app
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+      - PYTHONDONTWRITEBYTECODE=1
+    command: ["python", "-m", "squat_analyzer.main", "--debug"]

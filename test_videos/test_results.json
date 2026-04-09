@@ -1,0 +1,227 @@
+[
+  {
+    "video": "bodyweight_squat.mp4",
+    "total_frames": 1672,
+    "processed_frames": 1228,
+    "person_detected": 1354,
+    "legs_visible": 1228,
+    "reps": 3,
+    "fps": 7.4116531560509875,
+    "errors": 0,
+    "angle_stats": {
+      "knee": {
+        "min": 0.08156467974185944,
+        "max": 180.0,
+        "mean": 132.82264709472656,
+        "std": 53.79386520385742
+      },
+      "hip": {
+        "min": 6.951639175415039,
+        "max": 180.0,
+        "mean": 134.92283630371094,
+        "std": 42.629520416259766
+      },
+      "torso": {
+        "min": 0.0,
+        "max": 145.7796851950174,
+        "mean": 14.01830480308958,
+        "std": 25.541855382012024
+      }
+    },
+    "phases": {
+      "IDLE": 192,
+      "STANDING": 374,
+      "DESCENDING": 228,
+      "BOTTOM": 310,
+      "ASCENDING": 124
+    },
+    "rules": {
+      "torso_upright": {
+        "pass": 0,
+        "warning": 0,
+        "fail": 0,
+        "skip": 0
+      },
+      "knee_over_toe": {
+        "pass": 0,
+        "warning": 0,
+        "fail": 0,
+        "skip": 0
+      },
+      "depth": {
+        "pass": 0,
+        "warning": 0,
+        "fail": 0,
+        "skip": 0
+      },
+      "knee_valgus": {
+        "pass": 0,
+        "warning": 0,
+        "fail": 0,
+        "skip": 0
+      },
+      "hip_shift": {
+        "pass": 0,
+        "warning": 0,
+        "fail": 0,
+        "skip": 0
+      },
+      "stance_width": {
+        "pass": 0,
+        "warning": 0,
+        "fail": 0,
+        "skip": 0
+      }
+    }
+  },
+  {
+    "video": "squat_mistakes.mp4",
+    "total_frames": 9768,
+    "processed_frames": 6700,
+    "person_detected": 8614,
+    "legs_visible": 6700,
+    "reps": 25,
+    "fps": 7.512392984123937,
+    "errors": 0,
+    "angle_stats": {
+      "knee": {
+        "min": 0.0,
+        "max": 180.0,
+        "mean": 111.84919087594348,
+        "std": 50.63932550108091
+      },
+      "hip": {
+        "min": 0.36207687854766846,
+        "max": 180.0,
+        "mean": 112.23815155029297,
+        "std": 47.090843200683594
+      },
+      "torso": {
+        "min": 0.0,
+        "max": 172.42917692346728,
+        "mean": 11.428208780062846,
+        "std": 15.917397876222617
+      }
+    },
+    "phases": {
+      "IDLE": 1061,
+      "STANDING": 1251,
+      "DESCENDING": 1243,
+      "BOTTOM": 2894,
+      "ASCENDING": 251
+    },
+    "rules": {
+      "torso_upright": {
+        "pass": 0,
+        "warning": 0,
+        "fail": 0,
+        "skip": 0
+      },
+      "knee_over_toe": {
+        "pass": 0,
+        "warning": 0,
+        "fail": 0,
+        "skip": 0
+      },
+      "depth": {
+        "pass": 0,
+        "warning": 0,
+        "fail": 0,
+        "skip": 0
+      },
+      "knee_valgus": {
+        "pass": 0,
+        "warning": 0,
+        "fail": 0,
+        "skip": 0
+      },
+      "hip_shift": {
+        "pass": 0,
+        "warning": 0,
+        "fail": 0,
+        "skip": 0
+      },
+      "stance_width": {
+        "pass": 0,
+        "warning": 0,
+        "fail": 0,
+        "skip": 0
+      }
+    }
+  },
+  {
+    "video": "squat_proper_form.mp4",
+    "total_frames": 3004,
+    "processed_frames": 2900,
+    "person_detected": 2900,
+    "legs_visible": 2900,
+    "reps": 7,
+    "fps": 4.845442871634715,
+    "errors": 0,
+    "angle_stats": {
+      "knee": {
+        "min": 4.333771705627441,
+        "max": 180.0,
+        "mean": 161.06512451171875,
+        "std": 33.426727294921875
+      },
+      "hip": {
+        "min": 0.12820424139499664,
+        "max": 180.0,
+        "mean": 154.6193084716797,
+        "std": 39.255741119384766
+      },
+      "torso": {
+        "min": 0.0,
+        "max": 155.17508286095867,
+        "mean": 12.359949732334188,
+        "std": 23.544419495589466
+      }
+    },
+    "phases": {
+      "IDLE": 391,
+      "STANDING": 2075,
+      "DESCENDING": 129,
+      "BOTTOM": 214,
+      "ASCENDING": 91
+    },
+    "rules": {
+      "torso_upright": {
+        "pass": 0,
+        "warning": 0,
+        "fail": 0,
+        "skip": 0
+      },
+      "knee_over_toe": {
+        "pass": 0,
+        "warning": 0,
+        "fail": 0,
+        "skip": 0
+      },
+      "depth": {
+        "pass": 0,
+        "warning": 0,
+        "fail": 0,
+        "skip": 0
+      },
+      "knee_valgus": {
+        "pass": 0,
+        "warning": 0,
+        "fail": 0,
+        "skip": 0
+      },
+      "hip_shift": {
+        "pass": 0,
+        "warning": 0,
+        "fail": 0,
+        "skip": 0
+      },
+      "stance_width": {
+        "pass": 0,
+        "warning": 0,
+        "fail": 0,
+        "skip": 0
+      }
+    }
+  }
+]
